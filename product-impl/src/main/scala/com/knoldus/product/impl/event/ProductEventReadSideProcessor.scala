@@ -19,16 +19,13 @@ class ProductEventReadSideProcessor(db: CassandraSession, readSide: CassandraRea
 
   override def buildHandler() = readSide.builder[ProductEvent]("ProductEventReadSideProcessor")
     .setGlobalPrepare(createTable)
-    .setPrepare(_ => prepareInsertProduct())
+    .setPrepare(_ => prepareStatements())
     .setEventHandler[ProductAdded](ese => insertProduct(ese.event.product))
-    //.setPrepare(_ => prepareDeleteProduct())
-    .setEventHandler[ProductDeleted](ese => processProductDeleted(ese.event.id))
+    .setEventHandler[ProductDeleted](ese => deleteProduct(ese.event.id))
     .setEventHandler[ProductUpdated](ese => updateProduct(ese.event.product))
     .build()
 
   override def aggregateTags: Set[AggregateEventTag[ProductEvent]] = ProductEvent.Tag.allTags
-
-  // Helpers -----------------------------------------------------------------------------------------------------------
 
   private def createTable() = {
     db.executeCreateTable(
@@ -36,22 +33,22 @@ class ProductEventReadSideProcessor(db: CassandraSession, readSide: CassandraRea
         |id text PRIMARY KEY, title text, price text, description text)""".stripMargin)
   }
 
-  private def prepareInsertProduct(): Future[Done] =
+  private def prepareStatements(): Future[Done] =
     db.prepare("INSERT INTO product.product (id, title, price, description) VALUES (?, ?, ?, ?)")
       .map { ps =>
         insertProduct = ps
         Done
       }.map(_ => db.prepare("DELETE FROM product where id = ?").map(ps => {
-        deleteProduct = ps
-        Done
-      })).map(_ => db.prepare("update product set price=?,title=?,description=? where id =?").map(ps => {
+      deleteProduct = ps
+      Done
+    })).map(_ => db.prepare("UPDATE PRODUCT SET price=?,title=?,description=? where id =?").map(ps => {
       updateProduct = ps
       println("Successfully updated")
       Done.getInstance()
     })).flatten
 
   private def insertProduct(product: Product): Future[List[BoundStatement]] = {
-    val bindInsertProduct = insertProduct.bind()
+    val bindInsertProduct: BoundStatement = insertProduct.bind()
     bindInsertProduct.setString("id", product.id)
     bindInsertProduct.setString("title", product.title)
     bindInsertProduct.setString("price", product.price)
@@ -59,29 +56,23 @@ class ProductEventReadSideProcessor(db: CassandraSession, readSide: CassandraRea
     Future.successful(List(bindInsertProduct))
   }
 
-  private def prepareDeleteProduct() = {
+  /*private def prepareDeleteProduct() = {
     db.prepare("DELETE FROM product where id = ?")
       .map(ps => {
         deleteProduct = ps
         Done
       })
 
-  }
+  }*/
 
-  /*
-    private def setDeleteProduct(deleteProduct: PreparedStatement): Unit =
-      this.deleteProduct = deleteProduct
-  */
-
-  private def processProductDeleted(id: String) = {
-    val bindDeleteProduct = deleteProduct.bind()
-    //println(s"DEBUG Within processFriendRemoved userId: ${event.friendId} followedBy: ${event.userId}")
+  private def deleteProduct(id: String): Future[List[BoundStatement]] = {
+    val bindDeleteProduct: BoundStatement = deleteProduct.bind()
     bindDeleteProduct.setString("id", id)
     Future.successful(List(bindDeleteProduct))
   }
 
   private def updateProduct(product: Product): Future[List[BoundStatement]] = {
-    val bindUpdateProduct = updateProduct.bind()
+    val bindUpdateProduct: BoundStatement = updateProduct.bind()
     bindUpdateProduct.setString("id", product.id)
     bindUpdateProduct.setString("title", product.title)
     bindUpdateProduct.setString("price", product.price)

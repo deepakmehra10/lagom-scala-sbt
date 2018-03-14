@@ -3,6 +3,7 @@ package com.knoldus.product.impl
 import akka.{Done, NotUsed}
 import com.knoldus.product.api.{Product, ProductService}
 import com.knoldus.product.impl.command.{AddProduct, DeleteProduct, UpdateProduct}
+import com.knoldus.product.impl.constants.QueryConstants
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.transport.{ExceptionMessage, NotFound, TransportErrorCode}
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
@@ -15,7 +16,7 @@ class ProductServiceImpl(persistentEntityRegistry: PersistentEntityRegistry, ses
   extends ProductService {
 
   override def getProduct(id: String): ServiceCall[NotUsed, Product] = ServiceCall { _ =>
-    session.selectOne("select * from product where id = ?", id).map {
+    session.selectOne(QueryConstants.GET_PRODUCT, id).map {
       case Some(row) => Product.apply(row.getString("id"), row.getString("description"),
         row.getString("price"), row.getString("title"))
       case None => throw new NotFound(TransportErrorCode.NotFound, new ExceptionMessage("Product Id Not Found",
@@ -24,30 +25,27 @@ class ProductServiceImpl(persistentEntityRegistry: PersistentEntityRegistry, ses
   }
 
   override def getAllProduct(): ServiceCall[NotUsed, List[Product]] = ServiceCall { _ =>
-    session.selectAll("select * from product").map {
+    session.selectAll(QueryConstants.GET_ALL_PRODUCTS).map {
       row =>
-        row.map(product => Product(product.getString("id"),
-          product.getString("description"), product.getString("title"), product.getString("price"))).toList
+        row.map(product => Product(product.getString("id"), product.getString("description"),
+          product.getString("title"), product.getString("price"))).toList
     }
   }
 
   override def addProduct: ServiceCall[Product, Done] = ServiceCall { request =>
-    persistentEntityRegistry.refFor[ProductEntity1](request.id).ask(AddProduct(request))
+    persistentEntityRegistry.refFor[ProductEntity](request.id).ask(AddProduct(request))
       .map(_ => Done.getInstance())
   }
 
 
   override def deleteProduct(id: String): ServiceCall[NotUsed, Done] = ServiceCall { _ =>
-    persistentEntityRegistry.refFor[ProductEntity1](id).ask(DeleteProduct(id)).map(_ => Done.getInstance())
+    persistentEntityRegistry.refFor[ProductEntity](id).ask(DeleteProduct(id)).map(_ => Done.getInstance())
 
   }
 
   override def updateProduct(id: String): ServiceCall[Product, Done] = ServiceCall { request =>
-    persistentEntityRegistry.refFor[ProductEntity1](id).ask(UpdateProduct(request)).map(_ => Done.getInstance())
+    persistentEntityRegistry.refFor[ProductEntity](id).ask(UpdateProduct(request)).map(_ => Done.getInstance())
 
   }
-
-  //private def productEntityRef(product: Product) =
-  // persistentEntityRegistry.refFor(classOf[ProductEntity], product.id)
 
 }

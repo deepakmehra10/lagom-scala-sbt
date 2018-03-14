@@ -37,7 +37,7 @@ abstract class ProductApplication(context: LagomApplicationContext)
   // Register the JSON serializer registry
   override lazy val jsonSerializerRegistry = ProductSerializerRegistry
 
-  persistentEntityRegistry.register(wire[ProductEntity1])
+  persistentEntityRegistry.register(wire[ProductEntity])
 
   readSide.register(wire[ProductEventReadSideProcessor])
 
