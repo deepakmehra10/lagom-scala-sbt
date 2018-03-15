@@ -1,19 +1,9 @@
-version: 2
-jobs:
-  build:
-    docker:
-      - image: debian:stretch
-    steps:
-      - checkout
-      - run:
-          name: Greeting
-          command: echo Hello, world.
-      - run:
-          name: Print the Current Time
-          command: date
-      - run:
-          name: Print working directory
-          command: pwd
-      - run:
-          name: Compile code
-          command: sbt compile          
+language: scala
+scala:
+- 2.12.2
+jdk:
+- oraclejdk8
+- oraclejdk7
+script:
+- sbt clean
+- sbt compile
