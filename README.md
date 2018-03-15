@@ -3,7 +3,10 @@
 Building Reactive Scala application with Lagom framework. This is a classic CRUD application which persist events in Cassandra Database. Here we are using embedded Cassandra to persist events and embedded kafka for publishing and subscribing between microservices.
 
 ## Build Status
-[![Build Status](https://travis-ci.org/deepakmehra10/slack-github.svg?branch=master)](https://travis-ci.org/deepakmehra10/slack-github)
+[![Build Status](https://travis-ci.org/deepakmehra10/lagom-scala-sbt.svg?branch=master)](https://travis-ci.org/deepakmehra10/lagom-scala-sbt)
+
+## Visit Count
+[![HitCount](http://hits.dwyl.io/deepakmehra10/lagom-scala-sbt.svg)](http://hits.dwyl.io/deepakmehra10/lagom-scala-sbt)
 
 ##### Prerequisites
 
