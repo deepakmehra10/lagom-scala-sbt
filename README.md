@@ -3,7 +3,9 @@
 Building Reactive Scala application with Lagom framework. This is a classic CRUD application which persist events in Cassandra Database. Here we are using embedded Cassandra to persist events and embedded kafka for publishing and subscribing between microservices.
 
 Prerequisites
+
 Java Development Kit (JDK), version 8 or higher.
+
 sbt 0.13.5 or higher
 
 Getting the Project
