@@ -1,9 +1,12 @@
 package com.knoldus.product.impl.event
 
-import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventShards ,AggregateEventTag, AggregateEventTagger}
-import play.api.libs.json.{Format, Json}
 import com.knoldus.product.api.Product
+import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventShards, AggregateEventTag}
+import play.api.libs.json.{Format, Json}
 
+/**
+  * The ProductEvent trait.
+  */
 sealed trait ProductEvent extends AggregateEvent[ProductEvent] {
   override def aggregateTag: AggregateEventShards[ProductEvent] = ProductEvent.Tag
 }
@@ -13,6 +16,11 @@ object ProductEvent {
   val Tag: AggregateEventShards[ProductEvent] = AggregateEventTag.sharded[ProductEvent](NumShards)
 }
 
+/**
+  * Product Add Event.
+  *
+  * @param product - The product object.
+  */
 case class ProductAdded(product: Product) extends ProductEvent
 
 object ProductAdded {
@@ -20,6 +28,11 @@ object ProductAdded {
 
 }
 
+/**
+  * Product Delete Event.
+  *
+  * @param id - The product id.
+  */
 case class ProductDeleted(id: String) extends ProductEvent
 
 object ProductDeleted {
@@ -27,6 +40,11 @@ object ProductDeleted {
 
 }
 
+/**
+  * Product Update Event
+  *
+  * @param product - The product object.
+  */
 case class ProductUpdated(product: Product) extends ProductEvent
 
 object ProductUpdated {

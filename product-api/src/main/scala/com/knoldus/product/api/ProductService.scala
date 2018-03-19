@@ -3,8 +3,10 @@ package com.knoldus.product.api
 import akka.{Done, NotUsed}
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
-import play.api.libs.json.{Format, Json}
 
+/**
+  * The ProductService interface.
+  */
 
 trait ProductService extends Service {
 
@@ -35,8 +37,9 @@ trait ProductService extends Service {
   }
 }
 
+/*
 case class Product(id: String, title: String, price: String, description: String)
 
 object Product {
   implicit val format: Format[Product] = Json.format[Product]
-}
+}*/

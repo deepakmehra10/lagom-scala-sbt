@@ -8,6 +8,13 @@ import com.lightbend.lagom.scaladsl.persistence.{AggregateEventTag, ReadSideProc
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+  * The Class ProductEventReadSideProcessor.
+  *
+  * @param db       - The Cassandra Session.
+  * @param readSide - The Cassandra Readside.
+  * @param ec       - The execution context
+  */
 class ProductEventReadSideProcessor(db: CassandraSession, readSide: CassandraReadSide
                                    )(implicit ec: ExecutionContext) extends ReadSideProcessor[ProductEvent] {
 
@@ -27,7 +34,12 @@ class ProductEventReadSideProcessor(db: CassandraSession, readSide: CassandraRea
 
   override def aggregateTags: Set[AggregateEventTag[ProductEvent]] = ProductEvent.Tag.allTags
 
-  private def createTable() = {
+  /**
+    * Creates a table at the start up of the application.
+    *
+    * @return
+    */
+  private def createTable(): Future[Done] = {
     db.executeCreateTable(
       """CREATE TABLE IF NOT EXISTS product.product (
         |id text PRIMARY KEY, title text, price text, description text)""".stripMargin)
@@ -55,15 +67,6 @@ class ProductEventReadSideProcessor(db: CassandraSession, readSide: CassandraRea
     bindInsertProduct.setString("description", product.description)
     Future.successful(List(bindInsertProduct))
   }
-
-  /*private def prepareDeleteProduct() = {
-    db.prepare("DELETE FROM product where id = ?")
-      .map(ps => {
-        deleteProduct = ps
-        Done
-      })
-
-  }*/
 
   private def deleteProduct(id: String): Future[List[BoundStatement]] = {
     val bindDeleteProduct: BoundStatement = deleteProduct.bind()

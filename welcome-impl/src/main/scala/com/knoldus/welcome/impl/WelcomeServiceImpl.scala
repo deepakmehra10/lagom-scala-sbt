@@ -1,9 +1,9 @@
 package com.knoldus.welcome.impl
 
-import com.knoldus.welcome.api.{User, WelcomeService}
+import com.knoldus.welcome.api.WelcomeService
 import com.lightbend.lagom.scaladsl.api.ServiceCall
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 /**
@@ -11,29 +11,15 @@ import scala.concurrent.Future
   */
 class WelcomeServiceImpl extends WelcomeService {
 
-  var user = ListBuffer[User](User(1, "Deepak Mehra"), User(2, "Abhishek Giri"))
+  private final val log: Logger = LoggerFactory.getLogger(classOf[WelcomeServiceImpl])
 
+  /**
+    *
+    * @param name - Name of the user to be greeted.
+    * @return
+    */
   override def welcome(name: String) = ServiceCall { _ =>
+    log.info(s"Person with name $name, greeted.")
     Future.successful(s"Welcome, $name")
-  }
-
-  override def addUser() = ServiceCall { request =>
-    //request::user
-    print(user+"heyyyy")
-    //val fresh = request+=user
-    user+=request
-    print("\n\n\n\n")
-    //print(request::user)
-    print("\n\n\n\n")
-      //print(fresh)
-    Future.successful("User created successfully");
-  }
-
-  override def getUser(id: Int) = ServiceCall { _ =>
-    println(user+"before call")
-
-    print("\n\n\n\n")
-    println(user+"List")
-    Future.successful(user.filter(a => a.id == id).headOption.fold(throw new RuntimeException)(user => user));
   }
 }

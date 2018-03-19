@@ -11,6 +11,9 @@ import com.lightbend.lagom.scaladsl.server.{LagomApplication, LagomApplicationCo
 import com.softwaremill.macwire.wire
 import play.api.libs.ws.ahc.AhcWSComponents
 
+/**
+  *  The Class ProductLoader.
+  */
 class ProductLoader extends LagomApplicationLoader {
 
   override def load(context: LagomApplicationContext): LagomApplication =

@@ -8,6 +8,10 @@ import com.lightbend.lagom.scaladsl.server._
 import com.softwaremill.macwire._
 import play.api.libs.ws.ahc.AhcWSComponents
 
+/**
+  * The Class WelcomeLoader.
+  *
+  */
 class WelcomeLoader extends LagomApplicationLoader {
 
   override def load(context: LagomApplicationContext): LagomApplication =
@@ -23,20 +27,9 @@ class WelcomeLoader extends LagomApplicationLoader {
 
 abstract class WelcomeApplication(context: LagomApplicationContext)
   extends LagomApplication(context)
-    // with CassandraPersistenceComponents
-    // with LagomKafkaComponents
     with AhcWSComponents {
 
   // Bind the service that this server provides
   override lazy val lagomServer = serverFor[WelcomeService](wire[WelcomeServiceImpl])
-
-  // Register the JSON serializer registry
-  //override lazy val jsonSerializerRegistry = WelcomeSerializerRegistry
 }
 
-/*
-object WelcomeSerializerRegistry extends JsonSerializerRegistry {
-  override def serializers: Seq[JsonSerializer[_]] = Seq(
-    JsonSerializer[User],
-  )
-}*/

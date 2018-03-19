@@ -6,6 +6,9 @@ import com.knoldus.product.impl.event.{ProductAdded, ProductDeleted, ProductEven
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity
 import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
 
+/**
+  * The class ProductEntity
+  */
 class ProductEntity extends PersistentEntity {
 
   override type Command = ProductCommand[_]
