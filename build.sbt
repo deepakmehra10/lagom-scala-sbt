@@ -51,3 +51,6 @@ lazy val `product-impl` = (project in file("product-impl"))
   )
   .settings(lagomForkedTestSettings: _*)
   .dependsOn(`product-api`)
+
+//Define the external service’s host and port name.
+lagomUnmanagedServices in ThisBuild := Map("external-service" -> "https://jsonplaceholder.typicode.com")

@@ -1,6 +1,6 @@
 package com.knoldus.welcome.impl
 
-import com.knoldus.welcome.api.WelcomeService
+import com.knoldus.welcome.api.{ExternalService, WelcomeService}
 import com.lightbend.lagom.scaladsl.api.ServiceLocator
 import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
@@ -31,5 +31,8 @@ abstract class WelcomeApplication(context: LagomApplicationContext)
 
   // Bind the service that this server provides
   override lazy val lagomServer = serverFor[WelcomeService](wire[WelcomeServiceImpl])
+
+  //Bind the external service in ServiceModule.
+  lazy val externalService = serviceClient.implement[ExternalService]
 }
 

@@ -16,7 +16,8 @@ import scala.concurrent.{ExecutionContext, Future}
   * @param ec       - The execution context
   */
 class ProductEventReadSideProcessor(db: CassandraSession, readSide: CassandraReadSide
-                                   )(implicit ec: ExecutionContext) extends ReadSideProcessor[ProductEvent] {
+                                   )(implicit ec: ExecutionContext)
+  extends ReadSideProcessor[ProductEvent] {
 
   private var insertProduct: PreparedStatement = _
 

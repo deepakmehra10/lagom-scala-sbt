@@ -21,7 +21,7 @@ class ProductEntity extends PersistentEntity {
     Actions()
       .onCommand[AddProduct, Done] {
       case (AddProduct(product), ctx, _) =>
-        val event = ProductAdded(product)
+        val event: ProductEvent = ProductAdded(product)
         ctx.thenPersist(event) { _ =>
           ctx.reply(Done)
         }
@@ -32,7 +32,7 @@ class ProductEntity extends PersistentEntity {
       case (DeleteProduct(product), ctx, _) =>
         val event = ProductDeleted(product)
         ctx.thenPersist(event) { _ =>
-          ctx.reply(Done.getInstance())
+          ctx.reply(Done)
         }
     }.onEvent {
       case (_, state) =>

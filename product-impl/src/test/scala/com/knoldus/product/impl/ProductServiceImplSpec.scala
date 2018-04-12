@@ -13,16 +13,20 @@ import scala.concurrent.duration._
 
 class ProductServiceImplSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
-  private val server = ServiceTest.startServer(ServiceTest.defaultSetup) { ctx =>
+
+  lazy val server = ServiceTest.startServer(ServiceTest.defaultSetup.withCassandra(true)) { ctx =>
     new ProductApplication(ctx) with LocalServiceLocator
   }
 
-  val client = server.serviceClient.implement[ProductService]
+ lazy val client = server.serviceClient.implement[ProductService]
 
   override protected def beforeAll(): Unit = {
-    val cassandraSession: CassandraSession = server.application.cassandraSession
-    val session: Session = Await.result(cassandraSession.underlying(), 10 seconds)
+    server
+   println("\n\n\n\n\n\n\n\n"+"inside beforeALlllll"+ "\n\n\n\n\n\n\n\n")
+    val session: CassandraSession = server.application.cassandraSession
+    //val session: Session = Await.result(cassandraSession.underlying(), 30 seconds)
 
+    //println(session.execute("desc keyspaces;").one())
     //Create the required schema.
     createSchema(session)
 
@@ -33,29 +37,32 @@ class ProductServiceImplSpec extends AsyncWordSpec with Matchers with BeforeAndA
 
   override protected def afterAll() = server.stop()
 
-  private def createSchema(session: Session): Unit = {
+  private def createSchema(session: CassandraSession): Unit = {
+
     //Create Keyspace
-    session.execute("CREATE KEYSPACE IF NOT EXISTS product WITH replication = {'class': 'SimpleStrategy', "
-      + "'replication_factor': '1'}")
+   val createKeyspace = session.executeWrite("CREATE KEYSPACE IF NOT EXISTS product WITH replication = {'class': 'SimpleStrategy','replication_factor': '1'};")
+   Await.result(createKeyspace, 20.seconds)
+    // println(session.execute("CREATE KEYSPACE IF NOT EXISTS product WITH replication = {'class': 'SimpleStrategy','replication_factor': '1'}").one()+"\n\n\n\n\n\n\n\n\n\n\n\n\n\n")*/
+    //println("\n\n\n\n\n\n\n\n hehehehehe"+ session.execute("desc keyspaces;")+"\n\n\n\n\n\n\n\n\n")
 
     //Create table
-    session.execute("CREATE TABLE product.product("
-      + "id text PRIMARY KEY, "
-      + "title text, "
-      + "price text, "
-      + "description text)")
+    val createTable = session.executeCreateTable("""CREATE TABLE IF NOT EXISTS product (
+                      |id text PRIMARY KEY, title text, price text, description text)""".stripMargin)
+  Await.result(createTable, 20.seconds)
   }
 
-  private def populateData(session: Session): Unit = {
+  private def populateData(session: CassandraSession): Unit = {
     val product = Product("1", "Pen", "10", "Use this pen for smooth hand writing.")
-    session.execute("INSERT INTO product.product (id, title, price, description) VALUES (?, ?, ?, ?)", product.id,
+    val insertProduct = session.executeWrite("INSERT INTO product (id, title, price, description) VALUES (?, ?, ?, ?)", product.id,
       product.title, product.price, product.description)
+    Await.result(insertProduct, 20.seconds)
   }
 
   "Product service" should {
     val product = Product("1", "Pen", "10", "Use this pen for smooth hand writing.")
     "should return product by id" in {
       client.getProduct("1").invoke().map { response =>
+        println(response + "response")
         response should ===(product)
 
       }

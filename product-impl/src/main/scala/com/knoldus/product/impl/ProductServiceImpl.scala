@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext
   *
   * @param persistentEntityRegistry - Persistent Entity
   * @param session                  - Cassandra Session
-  * @param ec - Execution context
+  * @param ec                       - Execution context
   */
 class ProductServiceImpl(persistentEntityRegistry: PersistentEntityRegistry, session: CassandraSession)
                         (implicit ec: ExecutionContext)
@@ -32,8 +32,8 @@ class ProductServiceImpl(persistentEntityRegistry: PersistentEntityRegistry, ses
     */
   override def getProduct(id: String): ServiceCall[NotUsed, Product] = ServiceCall { _ =>
     session.selectOne(QueryConstants.GET_PRODUCT, id).map {
-      case Some(row) => Product.apply(row.getString("id"), row.getString("description"),
-        row.getString("price"), row.getString("title"))
+      case Some(row) => Product.apply(row.getString("id"), row.getString("title"), row.getString("price"),
+        row.getString("description"))
       case None => throw new NotFound(TransportErrorCode.NotFound, new ExceptionMessage("Product Id Not Found",
         "Product with this product id does not exist"))
     }
@@ -47,8 +47,8 @@ class ProductServiceImpl(persistentEntityRegistry: PersistentEntityRegistry, ses
     session.selectAll(QueryConstants.GET_ALL_PRODUCTS).map {
       row =>
         log.info("Getting list of all the products.")
-        row.map(product => Product(product.getString("id"), product.getString("description"),
-          product.getString("title"), product.getString("price"))).toList
+        row.map(product => Product(product.getString("id"), product.getString("title"), product.getString("price"),
+          product.getString("description"))).toList
     }
   }
 
@@ -56,11 +56,14 @@ class ProductServiceImpl(persistentEntityRegistry: PersistentEntityRegistry, ses
     *
     * @return
     */
-  override def addProduct: ServiceCall[Product, Done] = ServiceCall { request =>
-    persistentEntityRegistry.refFor[ProductEntity](request.id).ask(AddProduct(request))
+  override def addProduct: ServiceCall[Product, Done] =
+    ServiceCall { request =>
+    persistentEntityRegistry
+      .refFor[ProductEntity](request.id).ask(AddProduct(request))
       .map(_ => {
-        log.info(s"Product with product id ${request.id}, successfully added. ")
-        Done.getInstance()
+        log.info(s"Product with product id ${request.id}, " +
+          s"successfully added. ")
+        Done
       })
   }
 
@@ -70,7 +73,8 @@ class ProductServiceImpl(persistentEntityRegistry: PersistentEntityRegistry, ses
     * @return
     */
   override def deleteProduct(id: String): ServiceCall[NotUsed, Done] = ServiceCall { _ =>
-    persistentEntityRegistry.refFor[ProductEntity](id).ask(DeleteProduct(id)).map(_ => {
+    persistentEntityRegistry.refFor[ProductEntity](id)
+      .ask(DeleteProduct(id)).map(_ => {
       log.info(s"Product with product id ${id}, successfully deleted.")
       Done.getInstance()
     })
@@ -82,9 +86,13 @@ class ProductServiceImpl(persistentEntityRegistry: PersistentEntityRegistry, ses
     * @param id - The Product's id
     * @return
     */
-  override def updateProduct(id: String): ServiceCall[Product, Done] = ServiceCall { request =>
-    persistentEntityRegistry.refFor[ProductEntity](id).ask(UpdateProduct(request)).map(_ => {
-      log.info(s"Product with product id ${id}, successfully updated.")
+  override def updateProduct(id: String): ServiceCall[Product, Done] =
+    ServiceCall { request =>
+    persistentEntityRegistry
+      .refFor[ProductEntity](id).ask(UpdateProduct(request))
+      .map(_ => {
+      log.info(s"Product with product id ${id}, successfully " +
+        s"updated.")
       Done.getInstance()
     })
 

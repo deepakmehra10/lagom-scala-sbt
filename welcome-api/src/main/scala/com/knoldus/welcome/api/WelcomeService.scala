@@ -13,12 +13,15 @@ trait WelcomeService extends Service {
     */
   def welcome(name: String): ServiceCall[NotUsed, String]
 
+  def consumeUser(): ServiceCall[NotUsed, UserData]
+
   override final def descriptor = {
     import Service._
     // @formatter:off
     named("welcome")
       .withCalls(
         pathCall("/api/welcome/:name", welcome _),
+        pathCall("/consume/user", consumeUser _)
       )
       .withAutoAcl(true)
     // @formatter:on
